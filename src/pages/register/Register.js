@@ -4,10 +4,14 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 // import { Link } from "react-router-dom";
 import CustomInput from "../../components/custom-input/CustomInput";
+import { auth } from "../../firebase/firebase-config";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { Spinner } from "react-bootstrap";
 
 const Register = () => {
   const [frmDt, setFrmDt] = useState({});
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -29,12 +33,25 @@ const Register = () => {
 
   const handleOnSubmit = (e) => {
     e.preventDefault();
-
-    const { confirmPassword, password } = frmDt;
-
+    const { confirmPassword, password, email } = frmDt;
     if (confirmPassword !== password) {
-      toast.error("Password did not match!");
+      return toast.error("Password did not match!");
     }
+
+    setIsLoading(true);
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
+      });
   };
 
   const inputFields = [
@@ -95,7 +112,7 @@ const Register = () => {
         </div>
 
         <Button variant="primary" type="submit" disabled={error}>
-          Submit
+          {isLoading ? <Spinner animation="border" /> : "Submit"}
         </Button>
       </Form>
     </div>
