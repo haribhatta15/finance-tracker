@@ -20,6 +20,7 @@ const Register = () => {
       setError("");
       value.length < 6 && setError("Password is too short");
 
+      // conditions for password
       !/[0-9]/.test(value) && setError("Must include number");
       !/[A-Z]/.test(value) && setError("Must include uppercase");
       !/[a-z]/.test(value) && setError("Must include lowercase");
