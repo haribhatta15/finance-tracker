@@ -7,8 +7,11 @@ import CustomInput from "../../components/custom-input/CustomInput";
 import { auth } from "../../firebase/firebase-config";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Spinner } from "react-bootstrap";
+import { doc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [frmDt, setFrmDt] = useState({});
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -32,92 +35,145 @@ const Register = () => {
     });
   };
 
-  const handleOnSubmit = (e) => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
+
     const { confirmPassword, password, email } = frmDt;
+
     if (confirmPassword !== password) {
       return toast.error("Password did not match!");
     }
 
-    setIsLoading(true);
+    try {
+      const respPromise = createUserWithEmailAndPassword(
+        auth,
+        frmDt.email,
+        password
+      );
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // ..
+      toast.promise(respPromise, {
+        pending: "Please wait",
       });
+
+      const user = await respPromise;
+
+      if (user?.uid) {
+        updateProfile(user, {
+          displayName: frmDt.fName,
+        });
+
+        // store user profile in firebase database
+
+        const bd = {
+          fName: frmDt.fName,
+          lName: frmDt.lName,
+          email: frmDt.email,
+        };
+
+        await setDoc(doc(db, "Users", user.uid), obj);
+
+        toast.success(
+          "Your user has been created, redirecting to dashboard now."
+        );
+      }
+    } catch (eror) {
+      let msg = error.message;
+
+      if (msg.includes("auth/email-already-in-use")) {
+        msg =
+          "There is already an user having this email. Please change your email";
+
+        toast.error(error.message);
+      }
+
+      setIsLoading(true);
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          // ..
+        });
+    }
+
+    const inputFields = [
+      {
+        label: "First Name",
+        name: "fName",
+        placeholder: "David",
+        required: true,
+      },
+
+      {
+        label: "Last Name",
+        name: "lName",
+        placeholder: "Smith",
+        required: true,
+      },
+
+      {
+        label: "Email",
+        type: "email",
+        name: "email",
+        placeholder: "david123@email.com",
+        required: true,
+      },
+
+      {
+        label: "Password",
+        type: "password",
+        name: "password",
+        placeholder: "*******",
+        required: true,
+      },
+
+      {
+        label: "Confirm Password",
+        type: "password",
+        name: "confirmPassword",
+        placeholder: "*******",
+        required: true,
+      },
+    ];
+
+    return (
+      <div className="form-container">
+        <Form
+          onSubmit={handleOnSubmit}
+          className="border p-5 rounded shadow-lg"
+        >
+          <h3 className="text-center"> Register Form </h3>
+          <hr />
+
+          {inputFields.map((item, i) => (
+            <CustomInput key={i} {...item} onChange={handleOnChange} />
+          ))}
+
+          <div className="p3">
+            <Form.Text>
+              Password should be longer than 6 charcters contain at least one
+              number, one uppercase and one lowercase.
+              {error && (
+                <ul>
+                  <li className="text-danger fw-bolder">{error}</li>
+                </ul>
+              )}
+            </Form.Text>
+          </div>
+
+          <Button variant="primary" type="submit" disabled={error}>
+            {isLoading ? <Spinner animation="border" /> : "Submit"}
+          </Button>
+        </Form>
+      </div>
+    );
   };
-
-  const inputFields = [
-    {
-      label: "First Name",
-      name: "fName",
-      placeholder: "David",
-      required: true,
-    },
-
-    { label: "Last Name", name: "lName", placeholder: "Smith", required: true },
-
-    {
-      label: "Email",
-      type: "email",
-      name: "email",
-      placeholder: "david123@email.com",
-      required: true,
-    },
-
-    {
-      label: "Password",
-      type: "password",
-      name: "password",
-      placeholder: "*******",
-      required: true,
-    },
-
-    {
-      label: "Confirm Password",
-      type: "password",
-      name: "confirmPassword",
-      placeholder: "*******",
-      required: true,
-    },
-  ];
-
-  return (
-    <div className="form-container">
-      <Form onSubmit={handleOnSubmit} className="border p-5 rounded shadow-lg">
-        <h3 className="text-center"> Register Form </h3>
-        <hr />
-
-        {inputFields.map((item, i) => (
-          <CustomInput key={i} {...item} onChange={handleOnChange} />
-        ))}
-
-        <div className="p3">
-          <Form.Text>
-            Password should be longer than 6 charcters contain at least one
-            number, one uppercase and one lowercase.
-            {error && (
-              <ul>
-                <li className="text-danger fw-bolder">{error}</li>
-              </ul>
-            )}
-          </Form.Text>
-        </div>
-
-        <Button variant="primary" type="submit" disabled={error}>
-          {isLoading ? <Spinner animation="border" /> : "Submit"}
-        </Button>
-      </Form>
-    </div>
-  );
 };
 
 export default Register;
