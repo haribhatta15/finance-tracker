@@ -1,70 +1,91 @@
-import React from "react";
-import Register from "../register/Register";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import { Button, Form } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { CustomInput } from "../../components/custom-input/CustomInput";
+import { auth } from "../../firebase/firebase-config";
+import { setUser } from "../register-login/userSlice";
 
 const Login = () => {
-  const [formDT, setFrmDt] = useState({});
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [formDt, setFormDt] = useState({});
+  const { user } = useSelector((state) => state.userInfo);
+
+  useEffect(() => {
+    user?.uid && navigate("/dashboard");
+  }, [user?.uid, navigate]);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
+
+    setFormDt({
+      ...formDt,
+      [name]: value,
+    });
+  };
+
+  const handleOnSubmit = async (e) => {
+    e.preventDefault();
+
+    const { email, password } = formDt;
+
+    try {
+      const respPending = signInWithEmailAndPassword(auth, email, password);
+
+      toast.promise(respPending, {
+        pending: "please wait",
+      });
+
+      const { user } = await respPending;
+      if (user?.uid) {
+        dispatch(setUser(user));
+      }
+    } catch (error) {
+      let msg = error.message;
+      if (msg.includes("(auth/wrong-password)")) {
+        msg = "Invalid login credentials";
+      }
+      toast.error(msg);
+    }
   };
 
   const inputFields = [
     {
-      label: "First Name",
-      name: "fName",
-      placeholder: "David",
-      required: true,
-    },
-
-    {
-      label: "Last Name",
-      name: "lName",
-      placeholder: "Smith",
-      required: true,
-    },
-
-    {
       label: "Email",
       type: "email",
       name: "email",
-      placeholder: "david123@email.com",
+      placeholder: "Smith@emial.com",
       required: true,
     },
-
     {
       label: "Password",
       type: "password",
       name: "password",
-      placeholder: "*******",
-      required: true,
-    },
-
-    {
-      label: "Confirm Password",
-      type: "password",
-      name: "confirmPassword",
-      placeholder: "*******",
+      placeholder: "*****",
       required: true,
     },
   ];
+
   return (
-    <div>
+    <div className="mt-5">
       <Form onSubmit={handleOnSubmit} className="border p-5 rounded shadow-lg">
-        <h3 className="text-center"> Welcome Back </h3>
+        <h3>Welcome back!</h3>
         <hr />
 
         {inputFields.map((item, i) => (
           <CustomInput key={i} {...item} onChange={handleOnChange} />
         ))}
 
-        <div className="d-grid"></div>
-
-        <Button variant="primary" type="submit" disabled={error}>
-          {isLoading ? <Spinner animation="border" /> : "Submit"}
-        </Button>
+        <div className="d-grid">
+          <Button variant="primary" type="submit">
+            Login
+          </Button>
+        </div>
       </Form>
     </div>
   );
 };
-
 export default Login;
