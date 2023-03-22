@@ -6,9 +6,13 @@ import Register from "./pages/register/Register";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import PrivateRoute from "./PrivateRoute";
-import { Provider } from "react";
 
 function App() {
+  const dispatch = useDispatch();
+  onAuthStateChanged(auth, (user) => {
+    user && dispatch(setUser(user));
+  });
+
   return (
     <div className="wrapper">
       <Layout>
