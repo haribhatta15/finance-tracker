@@ -97,6 +97,7 @@ const Register = () => {
     }
   };
 
+  // creating reusable input fields
   const inputFields = [
     { label: "First Name", name: "fName", placeholder: "Sam", required: true },
 
