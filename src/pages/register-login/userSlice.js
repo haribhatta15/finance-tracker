@@ -1,3 +1,4 @@
+// REDUX IS LOVE
 // const [user, setUser] = useState({})
 
 import { createSlice } from "@reduxjs/toolkit";
