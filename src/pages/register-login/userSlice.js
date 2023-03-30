@@ -1,4 +1,4 @@
-// const [user, setUser] = useState({})
+// const [user, setUser] = useState({});
 
 import { createSlice } from "@reduxjs/toolkit";
 

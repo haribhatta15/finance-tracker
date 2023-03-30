@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CustomInput } from "../../components/custom-input/CustomInput";
 import { toast } from "react-toastify";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
@@ -28,7 +29,6 @@ const Register = () => {
       setError("");
       value.length < 6 && setError("Password is too short");
 
-      // setting the conditions for the password
       !/[0-9]/.test(value) && setError("Must include number");
       !/[A-Z]/.test(value) && setError("Must include uppercase");
       !/[a-z]/.test(value) && setError("Must include lowercase");
@@ -98,7 +98,6 @@ const Register = () => {
     }
   };
 
-  // creating reusable input fields
   const inputFields = [
     { label: "First Name", name: "fName", placeholder: "Sam", required: true },
 
@@ -157,5 +156,3 @@ const Register = () => {
 };
 
 export default Register;
-
-// Happy Coding 🙂

@@ -1,11 +1,12 @@
 import React from "react";
 
-const Footer = () => {
+export const Footer = () => {
   return (
-    <div className="mt-5 bg-dark text-light p-5 h6 text-center">
-      &copy; Hari Design 2023. All right reserved
+    <div className="mt-5 bg-dark text-light p-5 text-center">
+      &copy; Copy right reserved by Expenses Tracker | Made By{" "}
+      <a href="">Prem</a>
     </div>
   );
 };
 
-export default Footer;
+// footer ends

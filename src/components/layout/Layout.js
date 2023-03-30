@@ -1,7 +1,7 @@
-import React, { children } from "react";
-import Container from "react-bootstrap/esm/Container";
-import Header from "./Header";
-import Footer from "./Footer";
+import React from "react";
+import { Container } from "react-bootstrap";
+import { Footer } from "./Footer";
+import { Header } from "./Header";
 
 const Layout = ({ children }) => {
   return (

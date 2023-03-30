@@ -17,9 +17,12 @@ function App() {
     user && dispatch(setUser(user));
   });
 
+  // return
   return (
+    // create a wrapper
     <div className="wrapper">
       <Layout>
+        <h1></h1>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="register" element={<Register />} />
