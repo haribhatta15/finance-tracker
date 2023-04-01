@@ -8,5 +8,3 @@ export const Footer = () => {
     </div>
   );
 };
-
-// footer ends
