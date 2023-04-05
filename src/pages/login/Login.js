@@ -1,22 +1,11 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { CustomInput } from "../../components/custom-input/CustomInput";
-import { auth } from "../../firebase/firebase-config";
-import { setUser } from "../register-login/userSlice";
+// import { loginUser } from "/users/userAction";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [formDt, setFormDt] = useState({});
-  const { user } = useSelector((state) => state.userInfo);
-
-  useEffect(() => {
-    user?.uid && navigate("/dashboard");
-  }, [user?.uid, navigate]);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -29,27 +18,7 @@ const Login = () => {
 
   const handleOnSubmit = async (e) => {
     e.preventDefault();
-
-    const { email, password } = formDt;
-
-    try {
-      const respPending = signInWithEmailAndPassword(auth, email, password);
-
-      toast.promise(respPending, {
-        pending: "please wait",
-      });
-
-      const { user } = await respPending;
-      if (user?.uid) {
-        dispatch(setUser(user));
-      }
-    } catch (error) {
-      let msg = error.message;
-      if (msg.includes("(auth/wrong-password)")) {
-        msg = "Invalid login credentials";
-      }
-      toast.error(msg);
-    }
+    // loginUser(formDt);
   };
 
   const inputFields = [

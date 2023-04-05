@@ -1,15 +1,12 @@
 import React, { useState } from "react";
-
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomInput } from "../../components/custom-input/CustomInput";
 import { toast } from "react-toastify";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebase/firebase-config";
-import { doc, setDoc } from "firebase/firestore";
-import { setUser } from "../register-login/userSlice";
-import { useDispatch } from "react-redux";
+import { setDoc, doc } from "firebase/firestore";
 
 const initialState = {
   password: "Aa12345",
@@ -17,7 +14,6 @@ const initialState = {
 };
 
 const Register = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [frmDt, setFrmDt] = useState(initialState);
   const [error, setError] = useState("");
@@ -41,60 +37,45 @@ const Register = () => {
   };
 
   const handleOnSubmit = async (e) => {
-    e.preventDefault();
-
-    const { confirmPassword, password } = frmDt;
-
-    if (confirmPassword !== password) {
-      return toast.error("Password do not match!");
-    }
-
     try {
-      const respPromise = createUserWithEmailAndPassword(
+      e.preventDefault();
+
+      const { confirmPassword, password, email } = frmDt;
+
+      if (confirmPassword !== password) {
+        return toast.error("Password do not match!");
+      }
+
+      console.log(frmDt);
+      //user firebase auth sservice to create a new user auth account
+
+      const pendingState = createUserWithEmailAndPassword(
         auth,
-        frmDt.email,
+        email,
         password
       );
-      toast.promise(respPromise, {
-        pending: "please wait",
+      toast.promise(pendingState, {
+        pending: "Please wait...",
       });
 
-      const { user } = await respPromise;
-
+      const { user } = await pendingState;
       console.log(user);
       if (user?.uid) {
-        updateProfile(user, {
-          displayName: frmDt.fName,
-        });
+        toast.success("User has been registered!");
 
-        //store user profile in firestore database
-        const obj = {
+        // user is registered. NOW let's add them in our db for the future purpose
+
+        // send user to the dashboard
+        const userObj = {
           fName: frmDt.fName,
-          lName: frmDt.fName,
+          lName: frmDt.lName,
           email: frmDt.email,
         };
 
-        await setDoc(doc(db, "users", user.uid), obj);
-
-        //set data to redux store
-        dispatch(setUser(user));
-
-        toast.success(
-          "Your account has been created, redirecting to dashboard now"
-        );
-
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 3000);
+        await setDoc(doc(db, "users", user.uid), userObj);
       }
     } catch (error) {
-      let msg = error.message;
-      console.log(msg);
-      if (msg.includes("(auth/email-already-in-use)")) {
-        msg =
-          "There is another user have this email, please rest your password or change the email";
-      }
-      toast.error(msg);
+      toast.error(error.message);
     }
   };
 

@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import { Col, Row, Form, Button } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import { postTransaction } from "../../pages/dashboard/transAction";
 import { CustomInput } from "../custom-input/CustomInput";
 
 export const TransForm = () => {
-  const dispatch = useDispatch();
   const [dt, setDt] = useState({});
-
-  const { user } = useSelector((state) => state.userInfo);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -21,8 +16,6 @@ export const TransForm = () => {
 
   const handleOnSubmit = (e) => {
     e.preventDefault();
-
-    dispatch(postTransaction({ ...dt, userId: user.uid }));
   };
 
   return (

@@ -1,0 +1,23 @@
+import { toast } from "react-toastify";
+import { auth } from "../../firebase/firebase-config";
+import { signInUserWithEmailAndPassword } from "firebase/auths";
+import { doc, getDoc } from "firebase/firestore";
+
+const loginUser = async ({ email, password }) => {
+  try {
+    // check with auth service
+    const userCredentials = await signInUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    if (user?.uid) {
+      // get user from firestore service
+      const userResp = await getDoc(doc(auth, "users", user?.uid));
+    }
+    // mount user to the redux
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
