@@ -16,7 +16,7 @@ const loginUser = async ({ email, password }) => {
       // get user from firestore service
       const userResp = await getDoc(doc(auth, "users", user?.uid));
     }
-    // mount users to the redux
+    // mount users to redux
   } catch (error) {
     toast.error(error.message);
   }
