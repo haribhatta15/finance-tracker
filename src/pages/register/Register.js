@@ -1,12 +1,14 @@
 import React, { useState } from "react";
+
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomInput } from "../../components/custom-input/CustomInput";
 import { toast } from "react-toastify";
+
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebase/firebase-config";
-import { setDoc, doc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 const initialState = {
   password: "Aa12345",
@@ -46,8 +48,7 @@ const Register = () => {
         return toast.error("Password do not match!");
       }
 
-      console.log(frmDt);
-      //user firebase auth sservice to create a new user auth account
+      // user firebase auth service to create user auth account
 
       const pendingState = createUserWithEmailAndPassword(
         auth,
@@ -55,17 +56,14 @@ const Register = () => {
         password
       );
       toast.promise(pendingState, {
-        pending: "Please wait...",
+        pending: "Please wait ..",
       });
 
       const { user } = await pendingState;
       console.log(user);
       if (user?.uid) {
-        toast.success("User has been registered!");
+        // user is registered, now let's add them in our database for the future purpose
 
-        // user is registered. NOW let's add them in our db for the future purpose
-
-        // send user to the dashboard
         const userObj = {
           fName: frmDt.fName,
           lName: frmDt.lName,
@@ -73,6 +71,7 @@ const Register = () => {
         };
 
         await setDoc(doc(db, "users", user.uid), userObj);
+        toast.success("User has been registered. You may login now");
       }
     } catch (error) {
       toast.error(error.message);
